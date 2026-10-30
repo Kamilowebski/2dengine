@@ -1,5 +1,8 @@
 #biblioteka statyczna silnika
-add_library(engine STATIC src/Application.cpp)
+add_library(engine STATIC
+        src/Application.cpp
+        src/FpsCounter.cpp
+)
 
 #Naglowki publiczne widoczne dla kazdego kto linkuje silnik
 target_include_directories(engine PUBLIC include)
