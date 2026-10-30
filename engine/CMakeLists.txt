@@ -4,6 +4,8 @@ add_library(engine STATIC
         src/FpsCounter.cpp
         src/Input.cpp
         src/Logger.cpp
+        src/PrimitiveRenderer.cpp
+        src/Point2d.cpp
 )
 
 #Naglowki publiczne widoczne dla kazdego kto linkuje silnik

@@ -1,12 +1,14 @@
 #include <engine/Application.hpp>
 #include <engine/Logger.hpp>
+#include <engine/Point2d.hpp>
 
 #include <optional>
 #include <algorithm>
+#include <cmath>
 
 namespace engine {
     Application::Application(const WindowConfig &config)
-        : m_config(config), m_windowedResolution(config.resolution), m_fps(config.fontPath){
+        : m_config(config), m_windowedResolution(config.resolution), m_fps(config.fontPath), m_renderer(config.resolution){
         LOG_INFO("Inicjalizacja aplikacji");
         m_fps.setVisible(config.showFps);
         createWindow();
@@ -82,6 +84,7 @@ namespace engine {
 
         m_input.reset(); // czyste wejścia
         LOG_INFO("Buforowanie okna: podwójne (rysowanie w tylnym buforze, zamiana w display())");
+        m_renderer.resize(m_window.getSize());
     }
 
     void Application::applyConfig(const WindowConfig &config) {
@@ -142,6 +145,7 @@ namespace engine {
                 m_window.close();
             } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 m_window.setView(sf::View(sf::FloatRect({0.f, 0.f}, sf::Vector2f(resized->size))));
+                m_renderer.resize(resized->size);
             }
         }
     }
@@ -191,10 +195,60 @@ namespace engine {
     }
 
     void Application::render() {
-        m_window.clear(sf::Color::Black);
+        m_window.clear(sf::Color(30, 30, 40));
+        m_window.draw(m_demoCircle);
+
+        m_renderer.clear();
+        drawPrimitivesDemo();
+        m_renderer.present(m_window);
         //RENDER
         m_fps.draw(m_window);
-        m_window.draw(m_demoCircle);
         m_window.display();
+    }
+
+    void Application::drawPrimitivesDemo() {
+        const sf::Vector2u size = m_renderer.size();
+        const float cx = static_cast<float>(size.x) / 2.f;
+        const float cy = static_cast<float>(size.y) / 2.f;
+        constexpr float kPi = 3.14159265f;
+
+        // Wachlarz 16 odcinków algorytmem przyrostowym: sprawdza wszystkie kierunki
+        // (poziome, pionowe, skośne w każdej ćwiartce).
+        for (int i = 0; i < 16; ++i) {
+            const float angle = static_cast<float>(i) * 2.f * kPi / 16.f;
+            m_renderer.drawLineIncremental(cx, cy,
+                                           cx + std::cos(angle) * 200.f,
+                                           cy + std::sin(angle) * 200.f,
+                                           sf::Color(80, 220, 120));
+        }
+
+        // Odcinki do kursora myszy: oba algorytmy, różne kolory
+        const float mx = static_cast<float>(m_input.mousePosition().x);
+        const float my = static_cast<float>(m_input.mousePosition().y);
+
+        // Punkty: środek ekranu, róg i kursor myszy
+        Point2d center(cx, cy, sf::Color::White, 7);
+        Point2d corner(20.f, 20.f, sf::Color(255, 200, 0), 7);
+        Point2d mouse(static_cast<float>(m_input.mousePosition().x),
+                      static_cast<float>(m_input.mousePosition().y),
+                      sf::Color(255, 90, 90), 7);
+
+        // Odcinki między punktami: oba algorytmy, różne kolory
+        m_renderer.drawLine(corner, mouse, sf::Color(255, 200, 0));         // podstawowy: żółty
+        m_renderer.drawLineIncremental(center, mouse, sf::Color(255, 90, 90)); // przyrostowy: czerwony
+
+        // Rysowanie punktów (po liniach, żeby były na wierzchu)
+        center.draw(m_renderer);
+        corner.draw(m_renderer);
+        mouse.draw(m_renderer);
+
+        // Test setterów i getterów: punkt krąży wokół środka
+        Point2d orbit;
+        orbit.setColor(sf::Color(100, 180, 255));
+        orbit.setSize(9);
+        orbit.setPosition(cx + 120.f, cy);       // ustawienie pozycji
+        orbit.setX(orbit.x() + 10.f);            // odczyt i zmiana współrzędnej
+        orbit.draw(m_renderer);
+
     }
 }

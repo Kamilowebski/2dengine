@@ -2,6 +2,7 @@
 
 #include <engine/FpsCounter.hpp>
 #include <engine/Input.hpp>
+#include <engine/PrimitiveRenderer.hpp>
 
 #include <SFML/Graphics.hpp>
 #include <string>
@@ -129,6 +130,7 @@ namespace engine {
          * @brief Okno aplikacji.
          */
         sf::RenderWindow m_window;
+        PrimitiveRenderer m_renderer;
         sf::Vector2u m_windowedResolution;
         WindowConfig m_config;
         FpsCounter m_fps;
@@ -137,5 +139,6 @@ namespace engine {
         //TYCZMASOWE DANE:
         static constexpr float kDemoSpeed = 300.f;
         sf::CircleShape m_demoCircle{30.f};
+        void drawPrimitivesDemo(); //DEMO
     };
 }
