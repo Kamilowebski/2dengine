@@ -169,6 +169,18 @@ void PrimitiveRenderer::drawLineIncremental(const Point2d& p1, const Point2d& p2
     drawLineIncremental(p1.x(), p1.y(), p2.x(), p2.y(), color);
 }
 
+void PrimitiveRenderer::drawSegment(const Point2d& p1, const Point2d& p2, sf::Color color,
+                                       LineAlgorithm algorithm) {
+    switch (algorithm) {
+        case LineAlgorithm::Basic:
+            drawLine(p1, p2, color);
+            break;
+        case LineAlgorithm::Incremental:
+            drawLineIncremental(p1, p2, color);
+            break;
+    }
+}
+
 void PrimitiveRenderer::present(sf::RenderTarget& target) {
     // Wysyłamy cały bufor do tekstury (rozmiary są zgodne dzięki resize())
     m_texture.update(m_pixels.data());

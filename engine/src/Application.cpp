@@ -1,6 +1,8 @@
 #include <engine/Application.hpp>
 #include <engine/Logger.hpp>
 #include <engine/Point2d.hpp>
+#include <engine/LineSegment.hpp>
+
 
 #include <optional>
 #include <algorithm>
@@ -233,10 +235,23 @@ namespace engine {
                       static_cast<float>(m_input.mousePosition().y),
                       sf::Color(255, 90, 90), 7);
 
-        // Odcinki między punktami: oba algorytmy, różne kolory
-        m_renderer.drawLine(corner, mouse, sf::Color(255, 200, 0));         // podstawowy: żółty
-        m_renderer.drawLineIncremental(center, mouse, sf::Color(255, 90, 90)); // przyrostowy: czerwony
+        // --- LineSegment: ustawianie końców i rysowanie ---
+        LineSegment segment;                 // domyślnie oba końce w (0, 0)
+        segment.setStart(corner);            // ustawienie początku
+        segment.setEnd(mouse);               // ustawienie końca
+        segment.draw(m_renderer, sf::Color(255, 200, 0), LineAlgorithm::Basic); // żółty, algorytm podstawowy
 
+        // Odczyt końców: punkt w połowie odcinka
+        const Point2d mid((segment.start().x() + segment.end().x()) / 2.f,
+                          (segment.start().y() + segment.end().y()) / 2.f,
+                          sf::Color(120, 255, 120), 5);
+        mid.draw(m_renderer);
+
+        // Modyfikacja jednego końca: kopia punktu, zmiana współrzędnej, nowy odcinek
+        Point2d shiftedEnd = segment.end();
+        shiftedEnd.setY(shiftedEnd.y() + 40.f);
+        LineSegment shifted(segment.start(), shiftedEnd);
+        shifted.draw(m_renderer, sf::Color(255, 200, 0, 90)); // słabszy żółty, algorytm przyrostowy (domyślny)
         // Rysowanie punktów (po liniach, żeby były na wierzchu)
         center.draw(m_renderer);
         corner.draw(m_renderer);

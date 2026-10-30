@@ -6,6 +6,7 @@ add_library(engine STATIC
         src/Logger.cpp
         src/PrimitiveRenderer.cpp
         src/Point2d.cpp
+        src/LineSegment.cpp
 )
 
 #Naglowki publiczne widoczne dla kazdego kto linkuje silnik

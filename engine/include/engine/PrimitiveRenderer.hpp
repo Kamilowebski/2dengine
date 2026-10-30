@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <engine/Point2d.hpp>
+#include <engine/LineAlgorithm.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -101,6 +102,20 @@ public:
      * @param color Kolor odcinka.
      */
     void drawLineIncremental(float x1, float y1, float x2, float y2, sf::Color color);
+
+    /**
+     * @brief Rysuje odcinek między punktami wybranym algorytmem.
+     *
+     * Metoda pomocnicza: na podstawie parametru wywołuje drawLine()
+     * (algorytm podstawowy) albo drawLineIncremental() (algorytm przyrostowy).
+     * Używają jej LineSegment::draw() oraz rysowanie linii łamanych.
+     *
+     * @param p1 Początek odcinka (używane są tylko współrzędne).
+     * @param p2 Koniec odcinka.
+     * @param color Kolor odcinka.
+     * @param algorithm Algorytm rasteryzacji (domyślnie przyrostowy).
+     */
+    void drawSegment(const Point2d& p1, const Point2d& p2, sf::Color color, LineAlgorithm algorithm = LineAlgorithm::Incremental);
 
     /**
      * @brief Wysyła bufor do tekstury i rysuje go na celu renderowania.
