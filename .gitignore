@@ -1,0 +1,10 @@
+#Clion
+.idea/
+cmake-build-*/
+
+#wlasny katalog
+build/
+
+#pliki systemowe
+.DS_store
+Thumbs.db
