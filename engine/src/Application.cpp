@@ -7,6 +7,8 @@
 #include <optional>
 #include <algorithm>
 #include <cmath>
+#include <vector>
+
 
 namespace engine {
     Application::Application(const WindowConfig &config)
@@ -264,6 +266,36 @@ namespace engine {
         orbit.setPosition(cx + 120.f, cy);       // ustawienie pozycji
         orbit.setX(orbit.x() + 10.f);            // odczyt i zmiana współrzędnej
         orbit.draw(m_renderer);
+
+        // --- Linia łamana otwarta z wektora punktów: zygzak (algorytm przyrostowy) ---
+        std::vector<Point2d> zigzag;
+        for (int i = 0; i < 8; ++i) {
+            // Naprzemiennie wyżej i niżej
+            zigzag.emplace_back(60.f + 50.f * static_cast<float>(i), (i % 2 == 0) ? 560.f : 640.f);
+        }
+        m_renderer.drawPolyline(zigzag, false, sf::Color(90, 170, 255));
+
+        // --- Linia łamana zamknięta z wektora punktów: pięciokąt (algorytm podstawowy) ---
+        std::vector<Point2d> pentagon;
+        for (int i = 0; i < 5; ++i) {
+            const float angle = -kPi / 2.f + static_cast<float>(i) * 2.f * kPi / 5.f;
+            pentagon.emplace_back(cx + 350.f + std::cos(angle) * 90.f, cy + std::sin(angle) * 90.f);
+        }
+        m_renderer.drawPolyline(pentagon, true, sf::Color(255, 150, 60), LineAlgorithm::Basic);
+
+        // --- Linie łamane z wektora odcinków: litera U otwarta i zamknięta ---
+        // Funkcja lokalna tworząca 3 odcinki (litera U bez lewego boku) w podanym miejscu
+        auto makeU = [](float x, float y) {
+            std::vector<LineSegment> u;
+            u.emplace_back(x, y, x + 100.f, y);                   // góra
+            u.emplace_back(x + 100.f, y, x + 100.f, y + 100.f);   // prawy bok
+            u.emplace_back(x + 100.f, y + 100.f, x, y + 100.f);   // dół
+            return u;
+        };
+        const sf::Color purple(200, 120, 255);
+        m_renderer.drawPolyline(makeU(cx - 420.f, cy - 160.f), false, purple); // otwarta: brak lewego boku
+        m_renderer.drawPolyline(makeU(cx - 420.f, cy + 20.f), true, purple);   // zamknięta: dodany lewy bok
+
 
     }
 }

@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <engine/Point2d.hpp>
 #include <engine/LineAlgorithm.hpp>
+#include <engine/LineSegment.hpp>
+
 
 #include <cstdint>
 #include <vector>
@@ -116,6 +118,36 @@ public:
      * @param algorithm Algorytm rasteryzacji (domyślnie przyrostowy).
      */
     void drawSegment(const Point2d& p1, const Point2d& p2, sf::Color color, LineAlgorithm algorithm = LineAlgorithm::Incremental);
+
+    /**
+     * @brief Rysuje linię łamaną z listy punktów (otwartą lub zamkniętą).
+     *
+     * Kolejne punkty są łączone odcinkami. Przy closed == true i więcej niż
+     * dwóch punktach ostatni punkt jest dodatkowo łączony z pierwszym.
+     * Pusta lista nic nie rysuje, jeden punkt rysuje pojedynczy piksel.
+     *
+     * @param points Wierzchołki łamanej (używane są tylko współrzędne).
+     * @param closed true = łamana zamknięta (obrys wielokąta), false = otwarta.
+     * @param color Kolor linii.
+     * @param algorithm Algorytm rasteryzacji odcinków (domyślnie przyrostowy).
+     */
+    void drawPolyline(const std::vector<Point2d>& points, bool closed, sf::Color color,
+                      LineAlgorithm algorithm = LineAlgorithm::Incremental);
+
+    /**
+     * @brief Rysuje linię łamaną z listy odcinków (otwartą lub zamkniętą).
+     *
+     * Każdy odcinek z listy jest rysowany tak, jak został zapisany. Odcinki nie muszą
+     * tworzyć ciągłej łamanej. Przy closed == true i co najmniej dwóch odcinkach
+     * dodawany jest odcinek od końca ostatniego do początku pierwszego.
+     *
+     * @param segments Odcinki do narysowania.
+     * @param closed true = dodaj odcinek zamykający, false = rysuj tylko podane.
+     * @param color Kolor linii.
+     * @param algorithm Algorytm rasteryzacji odcinków (domyślnie przyrostowy).
+     */
+    void drawPolyline(const std::vector<LineSegment>& segments, bool closed, sf::Color color, LineAlgorithm algorithm = LineAlgorithm::Incremental);
+
 
     /**
      * @brief Wysyła bufor do tekstury i rysuje go na celu renderowania.

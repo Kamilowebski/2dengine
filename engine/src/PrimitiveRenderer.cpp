@@ -181,6 +181,43 @@ void PrimitiveRenderer::drawSegment(const Point2d& p1, const Point2d& p2, sf::Co
     }
 }
 
+void PrimitiveRenderer::drawPolyline(const std::vector<Point2d>& points, bool closed,
+                                     sf::Color color, LineAlgorithm algorithm) {
+    // Pusta lista: nie ma czego rysować
+    if (points.empty()) {
+        return;
+    }
+
+    // Jeden punkt: odcinek zerowej długości, czyli pojedynczy piksel
+    if (points.size() == 1) {
+        drawSegment(points.front(), points.front(), color, algorithm);
+        return;
+    }
+
+    // Odcinki między kolejnymi punktami: (0,1), (1,2), ..., (n-2, n-1)
+    for (std::size_t i = 0; i + 1 < points.size(); ++i) {
+        drawSegment(points[i], points[i + 1], color, algorithm);
+    }
+
+    // Zamknięcie: ostatni punkt z pierwszym (przy 2 punktach to ten sam odcinek, więc pomijamy)
+    if (closed && points.size() > 2) {
+        drawSegment(points.back(), points.front(), color, algorithm);
+    }
+}
+
+void PrimitiveRenderer::drawPolyline(const std::vector<LineSegment>& segments, bool closed,
+                                         sf::Color color, LineAlgorithm algorithm) {
+    // Każdy odcinek rysujemy tak, jak jest zapisany
+    for (const LineSegment& segment : segments) {
+        segment.draw(*this, color, algorithm);
+    }
+
+    // Zamknięcie: od końca ostatniego odcinka do początku pierwszego
+    if (closed && segments.size() > 1) {
+        drawSegment(segments.back().end(), segments.front().start(), color, algorithm);
+    }
+}
+
 void PrimitiveRenderer::present(sf::RenderTarget& target) {
     // Wysyłamy cały bufor do tekstury (rozmiary są zgodne dzięki resize())
     m_texture.update(m_pixels.data());
