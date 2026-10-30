@@ -1,11 +1,17 @@
 #include <engine/Application.hpp>
 #include <optional>
+#include <algorithm>
 
 namespace engine {
     Application::Application(const WindowConfig &config)
         : m_config(config), m_windowedResolution(config.resolution), m_fps(config.fontPath){
         m_fps.setVisible(config.showFps);
         createWindow();
+
+        //DEMO
+        m_demoCircle.setOrigin({m_demoCircle.getRadius(), m_demoCircle.getRadius()});
+        m_demoCircle.setPosition(sf::Vector2f(m_config.resolution) / 2.f);
+        m_demoCircle.setFillColor(sf::Color::White);
     }
 
     void Application::createWindow() {
@@ -31,6 +37,8 @@ namespace engine {
             m_window.setVerticalSyncEnabled(false);
             m_window.setFramerateLimit(m_config.framerateLimit);
         }
+
+        m_input.reset(); // czyste wejścia
     }
 
     void Application::applyConfig(const WindowConfig &config) {
@@ -64,6 +72,10 @@ namespace engine {
         return m_config;
     }
 
+    const Input &Application::input() const {
+        return m_input;
+    }
+
     void Application::run() {
         sf::Clock clock;
 
@@ -77,21 +89,51 @@ namespace engine {
     }
 
     void Application::processEvents() {
+        m_input.beginFrame();
         while (const std::optional event = m_window.pollEvent()) {
+            m_input.handleEvent(*event);
             if (event->is<sf::Event::Closed>()) {
                 m_window.close();
             } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 m_window.setView(sf::View(sf::FloatRect({0.f, 0.f}, sf::Vector2f(resized->size))));
-            } else if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                if (key->code == sf::Keyboard::Key::F11) {
-                    toggleFullscreen();
-                } else if (key->code == sf::Keyboard::Key::F3) {}
-                m_fps.toggleVisible();
             }
         }
     }
 
     void Application::update(float dt) {
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::F11)) {
+            toggleFullscreen();
+        }
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::F3)) {
+            m_fps.toggleVisible();
+            m_config.showFps = m_fps.isVisible();
+        }
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::Escape)) {
+            m_window.close();
+        }
+
+        //DEMO
+        sf::Vector2f direction{0.f, 0.f};
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::W)) {
+            direction.y -= 1.f;
+        }
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::S)) {
+            direction.y += 1.f;
+        }
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::A)) {
+            direction.x -= 1.f;
+        }
+        if (m_input.wasKeyPressed(sf::Keyboard::Key::D)) {
+            direction.x += 1.f;
+        }
+
+        if (direction.lengthSquared() > 0.f) {
+            m_demoCircle.move(direction.normalized() * kDemoSpeed * dt);
+        }
+        if (m_input.wasMouseButtonPressed(sf::Mouse::Button::Left)) {
+            m_demoCircle.setPosition(sf::Vector2f(m_input.mousePosition()));
+        }
+
         m_fps.update(dt);
     }
 
@@ -99,6 +141,7 @@ namespace engine {
         m_window.clear(sf::Color::Black);
         //RENDER
         m_fps.draw(m_window);
+        m_window.draw(m_demoCircle);
         m_window.display();
     }
 }

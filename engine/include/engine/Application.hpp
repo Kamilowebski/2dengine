@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/FpsCounter.hpp>
+#include <engine/Input.hpp>
 
 #include <SFML/Graphics.hpp>
 #include <string>
@@ -80,6 +81,13 @@ namespace engine {
          */
         [[nodiscard]] const WindowConfig& config() const;
 
+        /**
+         * @brief Dostęp do systemu wejścia.
+         *
+         * @return
+         */
+        const Input& input() const;
+
     private:
         /**
          * @brief Tworzy okno na podstawie konfiguracji.
@@ -110,5 +118,10 @@ namespace engine {
         sf::Vector2u m_windowedResolution;
         WindowConfig m_config;
         FpsCounter m_fps;
+        Input m_input;
+
+        //TYCZMASOWE DANE:
+        static constexpr float kDemoSpeed = 300.f;
+        sf::CircleShape m_demoCircle{30.f};
     };
 }
