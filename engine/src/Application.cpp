@@ -1,10 +1,13 @@
 #include <engine/Application.hpp>
+#include <engine/Logger.hpp>
+
 #include <optional>
 #include <algorithm>
 
 namespace engine {
     Application::Application(const WindowConfig &config)
         : m_config(config), m_windowedResolution(config.resolution), m_fps(config.fontPath){
+        LOG_INFO("Inicjalizacja aplikacji");
         m_fps.setVisible(config.showFps);
         createWindow();
 
@@ -12,6 +15,17 @@ namespace engine {
         m_demoCircle.setOrigin({m_demoCircle.getRadius(), m_demoCircle.getRadius()});
         m_demoCircle.setPosition(sf::Vector2f(m_config.resolution) / 2.f);
         m_demoCircle.setFillColor(sf::Color::White);
+        LOG_INFO("Aplikacja zainicjalizowana");
+    }
+
+    Application::~Application() {
+        LOG_INFO("Zamykanie aplikacji, zwalnianie zasobów");
+
+        if (m_window.isOpen()) {
+            m_window.close();
+        }
+
+        LOG_INFO("Okno zamknięte");
     }
 
     void Application::createWindow() {
@@ -19,6 +33,13 @@ namespace engine {
         const bool fullscreen = (m_config.mode == WindowMode::Fullscreen);
 
         if (fullscreen && !videoMode.isValid()) {
+            LOG_WARNING(
+                "Rozdzielczość "
+                << m_config.resolution.x
+                << "x"
+                << m_config.resolution.y
+                << " nieobsługiwana w pełnym ekranie, używam rozdzielczości pulpitu"
+            );
             videoMode = sf::VideoMode::getDesktopMode();
             m_config.resolution = videoMode.size;
         }
@@ -29,6 +50,27 @@ namespace engine {
 
         const sf::State state = fullscreen ? sf::State::Fullscreen : sf::State::Windowed;
         m_window.create(videoMode, m_config.title, state);
+        const sf::ContextSettings settings =
+        m_window.getSettings();
+
+        LOG_INFO(
+            "Okno utworzone: "
+            << videoMode.size.x
+            << "x"
+            << videoMode.size.y
+            << (fullscreen ? " (pełny ekran)" : " (okno)")
+            << ", VSync: "
+            << (m_config.vsync ? "włączony" : "wyłączony")
+        );
+
+        LOG_DEBUG(
+            "OpenGL "
+            << settings.majorVersion
+            << "."
+            << settings.minorVersion
+            << ", antyaliasing: "
+            << settings.antiAliasingLevel
+        );
 
         if (m_config.vsync) {
             m_window.setVerticalSyncEnabled(true);
@@ -77,6 +119,7 @@ namespace engine {
     }
 
     void Application::run() {
+        LOG_INFO("Start głównej pętli");
         sf::Clock clock;
 
         while (m_window.isOpen()) {
@@ -86,6 +129,7 @@ namespace engine {
             update(dt);
             render();
         }
+        LOG_INFO("Główna pętla zakończona");
     }
 
     void Application::processEvents() {
@@ -93,6 +137,7 @@ namespace engine {
         while (const std::optional event = m_window.pollEvent()) {
             m_input.handleEvent(*event);
             if (event->is<sf::Event::Closed>()) {
+                LOG_INFO("Żądanie zamknięcia okna (krzyżyk)");
                 m_window.close();
             } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 m_window.setView(sf::View(sf::FloatRect({0.f, 0.f}, sf::Vector2f(resized->size))));
@@ -105,10 +150,17 @@ namespace engine {
             toggleFullscreen();
         }
         if (m_input.wasKeyPressed(sf::Keyboard::Key::F3)) {
+            LOG_DEBUG(
+                "Licznik FPS: "
+                << (m_fps.isVisible()
+                    ? "widoczny"
+                    : "ukryty")
+            );
             m_fps.toggleVisible();
             m_config.showFps = m_fps.isVisible();
         }
         if (m_input.wasKeyPressed(sf::Keyboard::Key::Escape)) {
+            LOG_INFO("Zamknięcie klawiszem Escape");
             m_window.close();
         }
 

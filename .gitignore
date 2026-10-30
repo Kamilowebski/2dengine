@@ -8,3 +8,7 @@ build/
 #pliki systemowe
 .DS_store
 Thumbs.db
+
+#Logi
+logs/
+*.log

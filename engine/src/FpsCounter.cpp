@@ -1,4 +1,5 @@
 #include "engine/FpsCounter.hpp"
+#include <engine/Logger.hpp>
 
 #include <cmath>
 #include <stdexcept>
@@ -7,8 +8,21 @@ namespace engine {
     FpsCounter::FpsCounter(const std::string& fontPath, unsigned int characterSize)
         : m_text(m_font, "FPS: 0", characterSize) {
         if (!m_font.openFromFile(fontPath)) {
-            throw std::runtime_error("Nie można wczytać czcionki");
+            LOG_ERROR(
+                "Nie można wczytać czcionki: "
+                << fontPath
+            );
+
+            throw std::runtime_error(
+                "Nie można wczytać czcionki: "
+                + fontPath
+            );
         }
+
+        LOG_DEBUG(
+            "Wczytano czcionkę: "
+            << fontPath
+        );
         m_text.setFillColor(sf::Color::White);
         m_text.setOutlineColor(sf::Color::Black);
         m_text.setOutlineThickness(1.f);

@@ -45,6 +45,13 @@ namespace engine {
         explicit Application(const WindowConfig& config = {});
 
         /**
+         * @brief Zamyka aplikację i zwalnia zasoby
+         */
+        ~Application();
+        Application(const Application&) = delete;
+        Application& operator=(const Application&) = delete;
+
+        /**
          * @brief Uruchamia główną pętlę gry.
          */
         void run();
