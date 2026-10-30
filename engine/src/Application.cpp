@@ -81,6 +81,7 @@ namespace engine {
         }
 
         m_input.reset(); // czyste wejścia
+        LOG_INFO("Buforowanie okna: podwójne (rysowanie w tylnym buforze, zamiana w display())");
     }
 
     void Application::applyConfig(const WindowConfig &config) {

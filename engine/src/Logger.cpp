@@ -212,7 +212,7 @@ void Logger::setLevel(LogLevel level) {
 }
 
 LogLevel Logger::level() const {
-    return m_level;
+    return m_level.load();
 }
 
 bool Logger::isEnabled(LogLevel level) const {

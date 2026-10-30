@@ -29,6 +29,14 @@ struct LogConfig {
 
 class Logger {
 public:
+    /**
+     * @brief Zwraca globalną instancję loggera.
+     *
+     * Logger tworzony jest przy pierwszym wywołaniu
+     * zgodnie z wzorcem Meyer's Singleton.
+     *
+     * @return Referencja do loggera.
+     */
     static Logger& instance();
 
     Logger(const Logger&) = delete;

@@ -34,6 +34,13 @@ namespace engine {
 
     /**
      * @brief Główna pętla aplikacji, tworzy okno i obsługuje zdarzenia.
+     *
+     *
+     * @par Buforowanie
+     * Okno SFML zawsze używa podwójnego buforowania: rysujemy w tylnym buforze,
+     * a wywołanie sf::RenderWindow::display() zamienia go z przednim (widocznym).
+     * SFML nie udostępnia parametru liczby buforów, a potrójne buforowanie zależy od
+     * sterownika karty graficznej. Moment zamiany buforów ustawia WindowConfig::vsync.
      */
     class Application {
     public:
